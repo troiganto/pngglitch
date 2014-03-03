@@ -34,8 +34,6 @@ import os
 import zlib
 import random
 import argparse
-from string import hexdigits
-from collections import Counter
 
 
 
