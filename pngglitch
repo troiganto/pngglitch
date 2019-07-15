@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """Classes for introducing random glitch effects into PNG files.
 
 This script offers a class GlitchedPNGFile that enables the user
@@ -28,7 +27,6 @@ against using these.
 
 """
 
-
 import sys
 import os
 import zlib
@@ -36,39 +34,38 @@ import random
 import argparse
 
 
-
 class Chunk(object):
-    
     """Class representation of PNG chunks."""
-    
+
     # --- Chunk constructors -------------------------------------------
-    
+
     def __init__(self, name="IDAT", data=""):
         """Creates a chunk.
-        
+
         Fill it with the data parameter or via the method from_file.
-        
+
         """
         self.name = name
         self.pos = 0
         self.length = len(data)
-        self.crc = None # gets set through the data property
+        self.crc = None  # gets set through the data property
         self.data = data
-    
+
     def from_file(self, pngfile, pos=None):
         """Reads a chunk from the current position in f.
-        
+
         The pngfile argument is a PNG file opened in binary read mode.
         The pos argument is the position from which to read. It
         defaults to the current position.
-        
+
         Please note that this method does not check if the chunk
         indeed starts at the given position.
-        
+
         """
+
         def read_long_from_file(f):
             return self.get_long(bytearray(f.read(4)))
-        
+
         read_from_current = (pos is None)
         if not read_from_current:
             backup_pos = pngfile.tell()
@@ -82,14 +79,14 @@ class Chunk(object):
         # Go back to old position if necessary.
         if not read_from_current:
             pngfile.seek(backup_pos)
-    
+
     @classmethod
     def new_from_file(cls, pngfile, pos=None):
         """Like from_file, but returns a newly created Chunk."""
         chunk = cls()
         chunk.from_file(pngfile, pos)
         return chunk
-    
+
     def copy(self):
         """Returns a copy of this chunk."""
         new_chunk = type(self)(self.name)
@@ -98,100 +95,97 @@ class Chunk(object):
         new_chunk.raw_data = self.raw_data
         new_chunk.crc = self.crc
         return new_chunk
-        
+
     # --- Handling bytearrays ------------------------------------------
-    
+
     @staticmethod
     def set_long(num):
         """Stores a long int in a bytearray of length 4."""
-        return bytearray((num >> (8 * (3-i))) & 0xFF for i in range(4))
+        return bytearray((num >> (8 * (3 - i))) & 0xFF for i in range(4))
 
     @staticmethod
     def get_long(buf):
         """Extracts a long it from a bytearray of length 4."""
-        return sum(byte << (8 * (3-i)) for i, byte in enumerate(buf))
+        return sum(byte << (8 * (3 - i)) for i, byte in enumerate(buf))
 
     # --- Conversion to Strings ----------------------------------------
-    
+
     def get_raw(self):
         """Returns the whole chunk as a bytearray.
-        
+
         Use this this method to write the chunk into a file.
-        
+
         """
         return sum([
             self.set_long(self.length),
             self.name.encode("ascii"),
             self.raw_data,
             self.set_long(self.crc),
-            ], bytearray())
+        ], bytearray())
+
     def __str__(self):
         return '{name} chunk of length {length}, CRC: {crc}'.format(
-            name=self.name, length=self.length, crc=hex(self.crc)
-            )
+            name=self.name, length=self.length, crc=hex(self.crc))
+
     def __repr__(self):
         return '<{classname} object at {pos}>'.format(
             classname=type(self).__name__,
             pos=id(self),
-            )
-    
+        )
+
     # --- CRC Computation ----------------------------------------------
-    
+
     def compute_crc(self):
         """Compute the cyclic redundancy check sum."""
-        return zlib.crc32(self.name.encode("ascii")+self.raw_data)
-    
+        return zlib.crc32(self.name.encode("ascii") + self.raw_data)
+
     def update_crc(self):
         """Update the chunk's CRC."""
         self.crc = self.compute_crc()
-    
+
     def update_length(self):
         """Update the chunk's length."""
         self.length = len(self.raw_data)
-    
+
     def check_data(self):
         """Check whether the data's CRC matches the chunk's CRC
         attribute."""
         return self.crc == self.compute_crc()
-    
+
     # --- Access to the Data Member Via Property -----------------------
-    
+
     @property
     def data(self):
         """Access to the chunk data via property.
-        
+
         The data property gives access to the raw chunk data while
         keeping the chunk length and check sum up-to-date.
-        
+
         """
         return self.raw_data
-    
+
     @data.setter
     def data(self, new_data):
         self.raw_data = new_data
         self.update_crc()
         self.length = len(new_data)
-    
+
     # --- Various Built-ins --------------------------------------------
-    
+
     def __len__(self):
         return self.length
-    
+
     def __nonzero__(self):
         return bool(self.length)
 
 
-
-
-
 class PNGFile(object):
-    
     """Nice class representation of our beloved PNG files.
-    
+
     Contains methods for chunk access, loading, and writing.
-    
+
     """
-    
+
     # --- Constructor --------------------------------------------------
 
     def __init__(self, image_name=None):
@@ -209,61 +203,62 @@ class PNGFile(object):
                     self.chunks.append(new_chunk)
                 else:
                     eof = True
-    
+
     def copy(self):
         """Returns a deep copy of the PNG File."""
         new_image = type(self)()
         new_image.chunks = [chunk.copy() for chunk in self.chunks]
         return new_image
-        
+
     # --- Chunk Iterators ----------------------------------------------
 
     def idat_chunks(self):
         """Returns an iterable over all IDAT chunks."""
         return (chunk for chunk in self.chunks if chunk.name == "IDAT")
+
     def various_chunks(self):
         """Returns an iterable over all chunks except IDAT and IEND."""
-        return (chunk for chunk in self.chunks if
-                chunk.name not in {"IDAT", "IEND"})
+        return (chunk for chunk in self.chunks
+                if chunk.name not in {"IDAT", "IEND"})
 
     # --- Compression & Decompression ----------------------------------
 
     def decompress(self):
         """Get the decompressed image data.
-        
+
         This does not undo the filter applied to the image.
-        
+
         """
         buf = ''.join(chunk.data for chunk in self.idat_chunks())
         return bytearray(zlib.decompress(buf))
-    
+
     @staticmethod
     def buffer_to_chunks(buf, chunk_size):
         """Splits an uncompressed buffer into a list of IDAT chunks."""
         buf = zlib.compress(buffer(buf))
-        chunk_count = (len(buf) / chunk_size +
-                       (1 if len(buf) % chunk_size else 0))
+        chunk_count = (
+            len(buf) / chunk_size + (1 if len(buf) % chunk_size else 0))
         new_chunks = []
         for i in xrange(chunk_count):
-            data = buf[i*chunk_size : (i+1)*chunk_size]
+            data = buf[i * chunk_size:(i + 1) * chunk_size]
             new_chunks.append(Chunk("IDAT", data))
         return new_chunks
-    
+
     def overload(self, buf):
         """Forget the old image data and replace it with buf.
-        
+
         This compresses buf via Deflate and portions it into nice
         chunks.
         Do not delete the old image data before calling this method.
         This method will do that for you.
-        
+
         """
         chunk_size = len(next(self.idat_chunks()))
         new_chunks = list(self.various_chunks())
         new_chunks.extend(self.buffer_to_chunks(buf, chunk_size))
         new_chunks.append(Chunk("IEND"))
         self.chunks = new_chunks
-    
+
     # --- Writing to Disk ----------------------------------------------
 
     def write(self, name):
@@ -274,7 +269,6 @@ class PNGFile(object):
                 pngfile.write(chunk.get_raw())
 
 
-
 class GlitchedPNGFile(PNGFile):
 
     # --- Actually Important Methods -----------------------------------
@@ -283,29 +277,26 @@ class GlitchedPNGFile(PNGFile):
         """See PNGFile.__init__ for help."""
         PNGFile.__init__(self, image_name)
         self._decompressed = None
-    
+
     def begin_glitching(self):
         """Prepares the file for applying glitches."""
         self._decompressed = self.decompress()
-    
+
     def end_glitching(self):
         """Stops glitching and pack the file into chunks again."""
         self.overload(self._decompressed)
         self._decompressed = None
-    
+
     def random_glitches(self, glitch_amount, glitch_size, glitch_dev):
         """Applies random glitches to the image data.
-        
+
         glich_amount: number of bytes to be affected
         glitch_size: mean size of one glitch in bytes
         glich_dev: standard deviation of glitch_size
-        
+
         """
-        method_list = (
-            4 * [self.fill_noise] +
-            3 * [self.fill_zeros] +
-            [self.move, self.switch]
-            )
+        method_list = (4 * [self.fill_noise] + 3 * [self.fill_zeros] +
+                       [self.move, self.switch])
         to_be_glitched = glitch_amount
         while to_be_glitched > 0:
             amount = int(random.gauss(glitch_size, glitch_dev))
@@ -315,14 +306,14 @@ class GlitchedPNGFile(PNGFile):
 
     def glitch_file(self, glitch_amount, glitch_size, glitch_dev, copies=1):
         """Applies random glitches to a PNG file.
-        
+
         This is an iterator that calls the random_glitches method,
         wrapped in begin_glitching and end_glitching, and yields
         the resulting PNG files.
         The copies argument specifies how many results to yield.
         For help on the mandatory arguments, refer to the
         random_glitches method.
-        
+
         """
         self.begin_glitching()
         backup = self._decompressed[:]
@@ -338,88 +329,88 @@ class GlitchedPNGFile(PNGFile):
     def random_bytes(length):
         """Returns a random bytearray of specified length."""
         return bytearray(random.randint(0, 255) for i in range(length))
-    
+
     def _insert(self, pos, ins):
         """Inserts bytearray ins at position pos into the image data."""
         self._decompressed[pos:pos] = ins
         return len(ins)
-    
+
     def _remove(self, pos, length):
         """Removes length bytes at position pos from the image data."""
-        rem = self._decompressed[pos:pos+length]
-        del self._decompressed[pos:pos+length]
+        rem = self._decompressed[pos:pos + length]
+        del self._decompressed[pos:pos + length]
         return rem
-    
+
     def replace(self, pos, rep):
         """Replace image data at position pos with bytearray rep."""
         length = len(self._decompressed)
-        self._decompressed[pos:pos+len(rep)] = rep
+        self._decompressed[pos:pos + len(rep)] = rep
         del self._decompressed[length:]
-    
+
     def fill_noise(self, length, pos=None):
         """Replace image data with random bytes.
-        
+
         The pos argument is random if not specified otherwise.
-        
+
         """
         if pos is None:
             pos = random.randint(0, len(self._decompressed) - length)
         self.replace(pos, self.random_bytes(length))
-    
+
     def fill_zeros(self, length, pos=None):
         """Replace image data with zero bytes.
-        
+
         The pos argument is random if not specified otherwise.
-        
+
         """
         if pos is None:
             pos = random.randint(0, len(self._decompressed) - length)
         self.replace(pos, length * '\z')
-    
+
     def move(self, length, from_=None, to_=None):
         """Move a block of image data from one place to another.
-        
+
         The position arguments are random if not specified otherwise.
-        
+
         """
         if from_ is None:
             from_ = random.randint(0, len(self._decompressed) - length)
         if to_ is None:
             to_ = random.randint(0, len(self._decompressed) - length)
         self._insert(to_, self._remove(from_, length))
-    
+
     def switch(self, len_one, pos_one=None, len_two=None, pos_two=None):
         """Move a block of image data from one place to another.
-        
+
         The position arguments are random if not specified otherwise.
         If len_two is not specifies, len_one will be split into two
         random parts.
-        
+
         """
         if len_two is None:
             len_two = random.randint(1, len_one)
             len_one -= len_two
         if pos_one is None:
             pos_one = random.randint(
-                0, len(self._decompressed) - len_one - len_two)
+                0,
+                len(self._decompressed) - len_one - len_two,
+            )
         if pos_two is None:
             pos_two = random.randint(
-                pos_one + len_one, len(self._decompressed) - len_two)
+                pos_one + len_one,
+                len(self._decompressed) - len_two,
+            )
         if pos_one > pos_two:
             pos_one, pos_two = pos_two, pos_one
             len_one, len_two = len_two, len_one
         assert pos_one + len_one <= pos_two
-        self.move(len_two, pos_two, pos_one+len_one)
+        self.move(len_two, pos_two, pos_one + len_one)
         self.move(len_one, pos_one, pos_two)
 
 
-
-
-
 def parse_args():
-    
     """Interface to the command-line."""
-    
+
     def insert_index_into_filename(filename):
         """Turns "a.png" into "a.%d.png"."""
         pre, dot, suff = filename.rpartition('.')
@@ -429,42 +420,84 @@ def parse_args():
         """Returns a filename like "c40ac12baa3be95c.png"."""
         outfile = infile
         while os.path.isfile(outfile):
-            randint = random.randint(0, 16**16-1)
+            randint = random.randint(0, 16**16 - 1)
             outfile = format(randint, '016x') + '.png'
         return outfile
 
     # Parse the incoming parameters.
     parser = argparse.ArgumentParser(
         description='Create glitch effects in PNG files '
-        'by actually corrupting them.')
-    parser.add_argument('--outfile', '-o' , dest='outfile',
-                        action='store', type=str,
-                        help='Naming pattern for the output files. '
-                        'Defaults to "<infile>.%%d.png" if --num is '
-                        'specified and to "<infile>.corrupt.png" '
-                        'otherwise.')
-    parser.add_argument('--num', '-N' , dest='number', action='store',
-                        default=1, metavar='N', type=int,
-                        help='Number of output files. If not specified, '
-                        'one output file will be created.')
-    parser.add_argument('-R' , dest='randomize',
-                        action='store_true', default=False,
-                        help=format(random.randint(0, 16**16-1), '016x'))
-    parser.add_argument('--amount', '-a' , dest='amount', metavar='INT',
-                        action='store', type=int, default=100,
-                        help='Describes how many byte should be affected '
-                        'in total. Defaults to 100.')
-    parser.add_argument('--mean', '-m' , dest='mean', metavar='INT',
-                        action='store', type=int, default=20,
-                        help='Mean glitch size in bytes. Defaults to 20.')
-    parser.add_argument('--deviation', '-d' , dest='dev', metavar='INT',
-                        action='store', type=int, default=5,
-                        help='Standard deviation of glitch size in bytes. '
-                        'Defaults to 5.')
-    parser.add_argument('infile', metavar='INFILE', action='store', type=str,
-                        help='PNG file to be corrupted.')
+        'by actually corrupting them.', )
+    parser.add_argument(
+        '--outfile',
+        '-o',
+        dest='outfile',
+        action='store',
+        type=str,
+        help='Naming pattern for the output files. '
+        'Defaults to "<infile>.%%d.png" if --num is '
+        'specified and to "<infile>.corrupt.png" '
+        'otherwise.',
+    )
+    parser.add_argument(
+        '--num',
+        '-N',
+        dest='number',
+        action='store',
+        default=1,
+        metavar='N',
+        type=int,
+        help='Number of output files. If not specified, '
+        'one output file will be created.',
+    )
+    parser.add_argument(
+        '-R',
+        dest='randomize',
+        action='store_true',
+        default=False,
+        help=format(random.randint(0, 16**16 - 1), '016x'),
+    )
+    parser.add_argument(
+        '--amount',
+        '-a',
+        dest='amount',
+        metavar='INT',
+        action='store',
+        type=int,
+        default=100,
+        help='Describes how many byte should be affected '
+        'in total. Defaults to 100.',
+    )
+    parser.add_argument(
+        '--mean',
+        '-m',
+        dest='mean',
+        metavar='INT',
+        action='store',
+        type=int,
+        default=20,
+        help='Mean glitch size in bytes. Defaults to 20.',
+    )
+    parser.add_argument(
+        '--deviation',
+        '-d',
+        dest='dev',
+        metavar='INT',
+        action='store',
+        type=int,
+        default=5,
+        help='Standard deviation of glitch size in bytes. '
+        'Defaults to 5.',
+    )
+    parser.add_argument(
+        'infile',
+        metavar='INFILE',
+        action='store',
+        type=str,
+        help='PNG file to be corrupted.',
+    )
     args = parser.parse_args()
-    
+
     # Sanitize output filename.
     if args.outfile is None:
         if args.number > 1:
@@ -491,9 +524,6 @@ def parse_args():
     return args
 
 
-
-
-
 # Main program
 
 if __name__ == '__main__':
@@ -504,7 +534,7 @@ if __name__ == '__main__':
         glitch_amount=args.amount,
         glitch_size=args.mean,
         glitch_dev=args.dev,
-        )
+    )
     if args.number > 1:
         for i, outfile in enumerate(outfiles):
             outfile.write(args.outfile % i)
