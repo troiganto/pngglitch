@@ -362,7 +362,7 @@ class GlitchedPNGFile(PNGFile):
         """
         if pos is None:
             pos = random.randint(0, len(self._decompressed) - length)
-        self.replace(pos, length * '\z')
+        self.replace(pos, length * '\x00')
 
     def move(self, length, from_=None, to_=None):
         """Move a block of image data from one place to another.
