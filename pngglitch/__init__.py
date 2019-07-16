@@ -46,6 +46,7 @@ class Chunk(object):
         self.pos = 0
         self.length = len(data)
         self.crc = None  # gets set through the data property
+        self.raw_data = None
         self.data = data
 
     def from_file(self, pngfile, pos=None):
@@ -60,8 +61,8 @@ class Chunk(object):
 
         """
 
-        def read_long_from_file(f):
-            return self.get_long(bytearray(f.read(4)))
+        def _read_long_from_file(file_):
+            return self.get_long(bytearray(file_.read(4)))
 
         read_from_current = (pos is None)
         if not read_from_current:
@@ -69,10 +70,10 @@ class Chunk(object):
             pngfile.seek(pos)
         # Read information.
         self.pos = pngfile.tell()
-        self.length = read_long_from_file(pngfile)
+        self.length = _read_long_from_file(pngfile)
         self.name = pngfile.read(4).decode("ascii")
         self.raw_data = pngfile.read(self.length)
-        self.crc = read_long_from_file(pngfile)
+        self.crc = _read_long_from_file(pngfile)
         # Go back to old position if necessary.
         if not read_from_current:
             pngfile.seek(backup_pos)
@@ -267,6 +268,7 @@ class PNGFile(object):
 
 
 class GlitchedPNGFile(PNGFile):
+    """Subclass of PNGFile that adds methods to add glitch effects."""
 
     # --- Actually Important Methods -----------------------------------
 
@@ -314,7 +316,7 @@ class GlitchedPNGFile(PNGFile):
         """
         self.begin_glitching()
         backup = self._decompressed[:]
-        for i in range(copies):
+        for _ in range(copies):
             self._decompressed = backup[:]
             self.random_glitches(glitch_amount, glitch_size, glitch_dev)
             self.end_glitching()

@@ -14,7 +14,7 @@ def parse_args():
 
     def insert_index_into_filename(filename):
         """Turns "a.png" into "a.%d.png"."""
-        pre, dot, suff = filename.rpartition('.')
+        pre, _dot, suff = filename.rpartition('.')
         return pre + '.%d.' + suff
 
     def make_scrambled_filename(infile):
