@@ -298,11 +298,9 @@ class PNGFile(object):
                 raise TypeError('not a PNG file: {}'.format(image_name))
             eof = False
             while not eof:
-                # TODO: Check for IEND, not just for an empty chunk.
                 new_chunk = Chunk.new_from_file(png_file)
-                if new_chunk:
-                    self.chunks.append(new_chunk)
-                else:
+                self.chunks.append(new_chunk)
+                if new_chunk.name == "IEND":
                     eof = True
 
     def copy(self):
