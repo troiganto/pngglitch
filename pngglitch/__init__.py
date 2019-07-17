@@ -445,12 +445,10 @@ class GlitchedPNGFile(PNGFile):
         """
         method_list = (4 * [self.fill_noise] + 3 * [self.fill_zeros] +
                        [self.move, self.switch])
-        # TODO: to_be_glitched is redundant.
-        to_be_glitched = glitch_amount
-        while to_be_glitched > 0:
+        while glitch_amount > 0:
             amount = int(random.gauss(glitch_size, glitch_dev))
-            amount = min(max(amount, 2), to_be_glitched)
-            to_be_glitched -= amount
+            amount = min(max(amount, 2), glitch_amount)
+            glitch_amount -= amount
             random.choice(method_list)(amount)
 
     def glitch_file(self, glitch_amount, glitch_size, glitch_dev, copies=1):
