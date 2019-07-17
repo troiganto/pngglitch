@@ -59,13 +59,21 @@ class Chunk(object):
         pos (int): The position of the chunk in its PNG file. 0 for newly
             created chunks.
         length (int): The length of the chunk payload in bytes. This does not
-            count length nor type nor CRC. Do not modify this attribute. It
-            gets updated whenever `data` is set.
-        crc (int): The cyclic redundancy checksum of this chunk's payload. Do
-            not modify this attribute. It gets updated whenever `data` is set.
-        raw_data (str): The payload of this chunk as raw bytes. Do not modify
-            this attribute. The `data` property should be used instead, it
-            automatically updates CRC and length.
+            count length nor type nor CRC.
+
+            .. deprecated:: 1.1.0
+                Do not modify this attribute. It gets updated whenever `data`
+                is set.
+        crc (int): The cyclic redundancy checksum of this chunk's payload.
+
+            .. deprecated:: 1.1.0
+                Do not modify this attribute. It gets updated whenever `data`
+                is set.
+        raw_data (str): The payload of this chunk as raw bytes.
+
+            .. deprecated:: 1.1.0
+                Use the `data` property instead. It ensures that `length` and
+                `crc` stay consistent with the data.
     """
 
     # --- Chunk constructors -------------------------------------------
@@ -79,10 +87,9 @@ class Chunk(object):
         self.length = len(data)
         # TODO: Make `crc` a readonly property.
         self.crc = None  # This gets set through the `data` property.
-        self.raw_data = None  # TODO: Deprecate public usage.
+        self.raw_data = None
         self.data = data
 
-    # TODO: Deprecate this function.
     def from_file(self, pngfile, pos=None):
         """Read a chunk from a file.
 
@@ -106,6 +113,9 @@ class Chunk(object):
             pos (*int*, optional): If passed, chunk data is read from this
                 position inside `pngfile`. Otherwise, this reads from the
                 current position.
+
+        .. deprecated:: 1.1.0
+            Use `new_from_file()` instead.
 
         """
 
