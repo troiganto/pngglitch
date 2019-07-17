@@ -71,7 +71,9 @@ class Chunk(object):
     # --- Chunk constructors -------------------------------------------
 
     def __init__(self, name="IDAT", data=""):
-        # TODO: Verify the chunk type.
+        # TODO: Verify the chunk type better.
+        if len(name) != 4:
+            raise TypeError('invalid chunk type: {}'.format(name))
         self.name = name
         self.pos = 0
         self.length = len(data)
@@ -123,6 +125,8 @@ class Chunk(object):
         # Go back to old position if necessary.
         if not read_from_current:
             pngfile.seek(backup_pos)
+        if len(self.name) != 4:
+            raise TypeError('invalid chunk type: {}'.format(self.name))
 
     @classmethod
     def new_from_file(cls, pngfile, pos=None):
