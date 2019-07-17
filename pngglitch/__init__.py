@@ -467,19 +467,13 @@ class GlitchedPNGFile(PNGFile):
             GlitchedPNGFile: A copy of this file with glitches applied. This
             file itself is left unmodified.
 
-        Warning:
-            Due to a bug, this file itself does get modified by this method!
-
         """
-        # TODO: This does not leave `self` unmodified. This is a bug, so we're
-        # allowed to fix this.
-        self.begin_glitching()
-        backup = self._decompressed[:]
         for _ in range(copies):
-            self._decompressed = backup[:]
-            self.random_glitches(glitch_amount, glitch_size, glitch_dev)
-            self.end_glitching()
-            yield self.copy()
+            copy = self.copy()
+            copy.begin_glitching()
+            copy.random_glitches(glitch_amount, glitch_size, glitch_dev)
+            copy.end_glitching()
+            yield copy
 
     # --- Internal Stuff (Better Not Call Directly) --------------------
 
