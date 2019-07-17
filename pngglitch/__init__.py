@@ -410,8 +410,17 @@ class PNGFile(object):
 class GlitchedPNGFile(PNGFile):
     """Subclass of `PNGFile` that adds methods to add glitch effects.
 
-    Note:
-        TODO: usage example
+    Examples:
+        >>> png = GlitchFile(None)  # Pass a file name instead of None.
+        >>> png.begin_glitching()
+        >>> png.random_glitches(200, 10.5, 3.3)
+        >>> png.end_glitching()
+        >>> # png.write('output.png')  # If you want to save the file.
+
+        >>> png = GlitchFile(None)  # Pass a file name instead of None.
+        >>> it = png.glitch_file(200, 10.5, 3.3, 10)
+        >>> for i, output in enumerate(it, 1):
+        ...     # output.write('output.%d.png' % i)  # To save each file.
 
     Args:
         image_name (str): Path to the PNG file to load. If None or not passed,
