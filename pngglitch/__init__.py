@@ -270,6 +270,10 @@ class PNGFile(object):
             consists of a valid header and no chunks. (not even the mandatory
             ``IEND`` chunk!)
 
+    Raises:
+        TypeError: If the file given by `image_name` does not have a PNG
+            header.
+
     Attributes:
         header (str): The magic PNG header.
         chunks (list(Chunk)): The chunks of this PNG file.
@@ -279,13 +283,15 @@ class PNGFile(object):
     # --- Constructor --------------------------------------------------
 
     def __init__(self, image_name=None):
+        magic_header = b'\x89PNG\r\n\x1a\n'
         self.chunks = []
         if image_name is None:
-            self.header = b'\x89PNG\r\n\x1a\n'
+            self.header = magic_header
             return
         with open(image_name, "rb") as png_file:
-            # TODO Verify the header.
             self.header = png_file.read(8)
+            if self.header != magic_header:
+                raise TypeError('not a PNG file: {}'.format(image_name))
             eof = False
             while not eof:
                 # TODO: Check for IEND, not just for an empty chunk.
