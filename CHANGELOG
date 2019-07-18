@@ -1,0 +1,61 @@
+Changelog
+=========
+
+.. py:currentmodule:: pngglitch
+
+Unreleased
+----------
+
+*Released Month Day, Year*
+
+* Switch license from GPL 2.0 to Apache.
+
+* Make project compatible with setuptools.
+
+  This means it is now possible to install Pngglitch via ``python setup.py
+  install``.
+
+* Use Sphinx for documentation.
+
+* Fix bogus null-byte escape sequence in `GlitchedPNGFile.fill_zeros()`.
+
+* Fix self-modification bug in `GlitchedPNGFile.random_glitches()`.
+
+  The iterator would modify the original PNG file even though there is no
+  necessity for it. Now, ``self`` stays unmodified throughout the iteration.
+
+* Fix missing verification of the PNG header in files loaded via `PNGFile`.
+
+  Now, files that don't have the magic PNG header are always rejected.
+
+* Fix missing verification of chunk type length in `Chunk` constructor.
+
+  The constructor now ensures that the passed type is exactly four bytes long.
+
+* Fix buggy end-of-file detection in `PNGFile`.
+
+  The contructor would stop loading chunks as soon as it encountered a chunk
+  without paylod. Now it correctly stops only when the IEND chunk is
+  encountered.
+
+* Deprecate fragile attributes of `Chunk`.
+
+  The attributes `~Chunk.length`, `~Chunk.crc` and `~Chunk.raw_data` are
+  technically public, but modifying them easily leads to an inconsistent chunk
+  state. They are deprecated in favor of the `~Chunk.data` property.
+
+Version 1.0.1
+-------------
+
+*Released March 3, 2014*
+
+* Remove unnecessary imports from modules ``collections`` and ``string``.
+
+Version 1.0.0
+-------------
+
+*Released March 3, 2014*
+
+This is the initial version.
+
+.. vi:ft=rst:tw=79:et
