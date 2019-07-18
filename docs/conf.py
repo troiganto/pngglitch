@@ -28,24 +28,16 @@ templates_path = []
 source_suffix = '.rst'
 master_doc = 'index'
 exclude_patterns = ['build', 'Thumbs.db', '.DS_Store']
+
 default_role = 'py:obj'
+manpages_url = 'https://linux.die.net/man/{section}/{page}'
 
 pygments_style = 'sphinx'
 html_theme = 'classic'
 html_theme_options = {}
-# html_static_path = []
 
-# Custom sidebar templates, must be a dictionary that maps document names
-# to template names.
-#
-# The default sidebars (for documents that don't match any pattern) are
-# defined by theme itself.  Builtin themes are using these templates by
-# default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
-# 'searchbox.html']``.
-#
-# html_sidebars = {}
+# -- Options for LaTeX output ------------------------------------------------
 
-htmlhelp_basename = 'pngglitchdoc'
 latex_elements = {
     'papersize': 'a4paper',
     'pointsize': '12pt',
@@ -55,8 +47,24 @@ latex_elements = {
 latex_documents = [
     (master_doc, 'pngglitch.tex', 'pngglitch', 'Nico Madysa', 'manual'),
 ]
-man_pages = [(master_doc, 'pngglitch', 'pngglitch Documentation', [author], 1)]
+
+# -- Options for manual page output ------------------------------------------
+
+# One entry per manual page.
+# (source start file, name, description, authors, manual section).
+man_pages = [
+    ('commandline', 'pngglitch',
+     'Add glitch effects to PNG (Portable Network Graphics) files.', [author],
+     1),
+]
+
+# -- Options for Texinfo output ----------------------------------------------
+
+# Grouping the document tree into Texinfo files. List of tuples
+# (source start file, target name, title, author,
+#  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'pngglitch', 'pngglitch', author, 'pngglitch',
-     'Add glitch effects to PNG files.', 'Miscellaneous'),
+     'Add glitch effects to PNG (Portable Network Graphics) files.',
+     'Miscellaneous'),
 ]
