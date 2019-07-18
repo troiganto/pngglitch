@@ -8,7 +8,7 @@ import sys
 sys.path.insert(0, os.path.abspath('..'))
 
 project = 'pngglitch'
-copyright = '2019, Nico Madysa'  # pylint: disable=redefined-builtin
+copyright = '2014–2019, Nico Madysa'  # pylint: disable=redefined-builtin
 author = 'Nico Madysa'
 
 version = '1.0'
