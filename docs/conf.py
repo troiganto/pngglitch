@@ -5,7 +5,7 @@
 
 import os
 import sys
-sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('..'))
 
 project = 'pngglitch'
 copyright = '2019, Nico Madysa'  # pylint: disable=redefined-builtin
@@ -22,17 +22,18 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.napoleon',
 ]
+autodoc_member_order = 'groupwise'
 
 templates_path = []
 source_suffix = '.rst'
-master_doc = 'docs/modules'
+master_doc = 'index'
 exclude_patterns = ['build', 'Thumbs.db', '.DS_Store']
 default_role = 'py:obj'
 
-pygments_style = None
-html_theme = 'alabaster'
-# html_theme_options = {}
-html_static_path = []
+pygments_style = 'sphinx'
+html_theme = 'classic'
+html_theme_options = {}
+# html_static_path = []
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.

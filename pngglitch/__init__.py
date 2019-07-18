@@ -248,7 +248,7 @@ class Chunk(object):
 
     @property
     def data(self):
-        """The payload of this chunk.
+        """str: The payload of this chunk.
 
         Only access the data through this property. This ensures that the CRC
         and length attributes stay consistent.
