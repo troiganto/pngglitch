@@ -39,6 +39,12 @@ image and, thus, may render it unreadable. They should not be used.
 import zlib
 import random
 
+__author__ = "Nico Madysa"
+__copyright__ = "Copyright 2014–2019, Nico Madysa"
+__credits__ = ["Nico Madysa"]
+__license__ = "Apache-2.0"
+__version__ = "1.0.1"
+
 # TODO: Split into several modules. Turn glitch effects into functions or an
 # unrelated class that *operates* on PNG files instead of *being* a PNG file.
 # Allow streaming operation if possible.
