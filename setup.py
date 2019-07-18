@@ -14,8 +14,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Setup script for Pngglitch."""
 
-from setuptools import setup, find_packages
+from setuptools import setup
+
+# pylint: disable=invalid-name
 
 long_description = """\
 This script offers a class GlitchedPNGFile that enables the user
@@ -34,8 +37,8 @@ setup(
     entry_points={
         'console_scripts': [
             'pngglitch = pngglitch.__main__:main',
-            ]
-        },
+        ]
+    },
     zip_safe=True,
     author='Nico Madysa',
     author_email='uebertreiber@gmx.de',
@@ -52,7 +55,7 @@ setup(
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 2 :: Only',
         'Topic :: Artistic Software',
-        ],
+    ],
     keywords='png glitch art',
     url='https://github.com/troiganto/pngglitch',
 )
