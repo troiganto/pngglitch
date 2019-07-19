@@ -14,48 +14,54 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Setup script for Pngglitch."""
 
+# pylint: disable=invalid-name, exec-used
+"""Setup script for pngglitch."""
+
+import os
+import sys
 from setuptools import setup
+try:
+    from sphinx.setup_command import BuildDoc
+    cmdclass = {"build_sphinx": BuildDoc}
+except ImportError:
+    print >> sys.stderr, "info: install Sphinx to build documentation"
 
-# pylint: disable=invalid-name
+__docformat__ = "restructuredtext en"
 
-long_description = """\
-This script offers a class GlitchedPNGFile that enables the user
-to partially decompress a PNG file and deliberately put errors into
-it's bytestream.
+# Source information from __pkginfo__.py.
+basedir = os.path.dirname(__file__)
+__pkginfo__ = {}
+with open(os.path.join(basedir, "pngglitch", "__pkginfo__.py")) as infile:
+    exec infile.read() in __pkginfo__
 
-It can also be called from the command line to corrupt PNG files individually
-or in bulk.
-"""
+# Source long description from README.rst.
+with open(os.path.join(basedir, "README.rst")) as infile:
+    long_description = infile.read()
 
 setup(
-    name='pngglitch',
-    version='1.0.1',
-    python_requires='>=2.7',
-    packages=['pngglitch'],
-    entry_points={
-        'console_scripts': [
-            'pngglitch = pngglitch.__main__:main',
-        ]
-    },
-    zip_safe=True,
-    author='Nico Madysa',
-    author_email='uebertreiber@gmx.de',
-    description='Corrupt PNG files without breaking their checksums',
+    name=__pkginfo__["name"],
+    version=__pkginfo__["version"],
+    python_requires=__pkginfo__["python_requires"],
+    packages=["pngglitch"],
+    entry_points=__pkginfo__["entry_points"],
+    zip_safe=__pkginfo__["zip_safe"],
+    author=__pkginfo__["author"],
+    author_email=__pkginfo__["author_email"],
+    description=__pkginfo__["description"],
     long_description=long_description,
-    license='Apache License, Version 2.0',
-    classifiers=[
-        'Development Status :: 5 - Production/Stable',
-        'Environment :: Console',
-        'Intended Audience :: Other Audience',
-        'License :: OSI Approved :: Apache Software License',
-        'Natural Language :: English',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 2 :: Only',
-        'Topic :: Artistic Software',
-    ],
-    keywords='png glitch art',
-    url='https://github.com/troiganto/pngglitch',
+    license=__pkginfo__["license"],
+    classifiers=__pkginfo__["classifiers"],
+    keywords=__pkginfo__["keywords"],
+    url=__pkginfo__["url"],
+    command_options={
+        "build_sphinx": {
+            "project": ("setup.py", __pkginfo__["name"]),
+            "version": ("setup.py", __pkginfo__["shortversion"]),
+            "release": ("setup.py", __pkginfo__["version"]),
+            "copyright": ("setup.py", __pkginfo__["copyright"]),
+            "source_dir": ("setup.py", "docs"),
+            "builder": ("setup.py", ["html", "man"]),
+        },
+    },
 )
