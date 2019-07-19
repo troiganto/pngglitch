@@ -3,10 +3,10 @@ Changelog
 
 .. py:currentmodule:: pngglitch
 
-Unreleased
-----------
+Version 1.1.0
+-------------
 
-*Released Month Day, Year*
+*Released July 19, 2019*
 
 * Switch license from GPL 2.0 to Apache.
 

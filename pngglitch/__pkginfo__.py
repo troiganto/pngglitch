@@ -21,7 +21,7 @@
 name = "pngglitch"
 description = "Corrupt PNG files without breaking their checksums"
 
-numversion = (1, 0, 1)
+numversion = (1, 1, 0)
 devversion = None
 
 shortversion = "{0[0]}.{0[1]}".format(numversion)
